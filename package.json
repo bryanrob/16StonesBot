@@ -1,0 +1,24 @@
+{
+
+    “name”: "16_Stones",
+
+    “version”: "1.0.0",
+
+    “description”: "Play a game in chat",
+
+    “main”: "bot.js",
+
+    "author": "16StonesTeam",
+
+    “dependencies”: {},
+
+    "dependencies": {
+
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+
+        "winston": "^3.5.1"
+
+    }
+
+}
+
