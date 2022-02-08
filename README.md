@@ -12,5 +12,7 @@ When setting up add command line code:
     pip install discord.py
     and 
     pip install python-dotenv
+    
+   you will also need to make a .env file that is in the same folder as bot.py
   
   this allows bot to be altered and edited
