@@ -7,4 +7,10 @@ When setting up add command line code:
  
   npm install https://github.com/woor/discord.io/tarball/gateway_v6
   
+  There is also a python version of the bot. In order to use the python version the uploader needs to install
+  
+    pip install discord.py
+    and 
+    pip install python-dotenv
+  
   this allows bot to be altered and edited
