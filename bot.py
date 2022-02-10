@@ -48,7 +48,7 @@ async def on_message(message):
 
     if message.content == '!play':
         game = SixteenStones()
-        outputString =('Turn: '+str(game.getturn()) + '\n')
+        outputString =('Turn: '+str(game.getTurn()) + '\n')
         currentBoard = game.getBoard()
         for i in range(len(currentBoard)):
             for j in range(currentBoard[i]):
