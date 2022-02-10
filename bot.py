@@ -43,9 +43,6 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    game = [ (os.system('python Stones.py')
-    ) ]
-
     if message.content == '!play':
         game = SixteenStones()
         outputString =('Turn: '+str(game.getTurn()) + '\n')
