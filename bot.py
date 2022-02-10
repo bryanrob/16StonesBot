@@ -1,7 +1,7 @@
 # bot.py
 import os
 import random
-import Stones
+from Stones import SixteenStones
 import discord
 from dotenv import load_dotenv
 
@@ -53,6 +53,6 @@ async def on_message(message):
         for i in range(len(currentBoard)):
             for j in range(currentBoard[i]):
                 outputString+='O '
-            outputStgring+='\n'
-        await message.channel.send(response)
+            outputString+='\n'
+        await message.channel.send(OutputString)
 client.run(TOKEN)
