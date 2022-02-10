@@ -47,6 +47,12 @@ async def on_message(message):
     ) ]
 
     if message.content == '!play':
-        response = game
+        game = SixteenStones()
+        outputString('Turn: '+str(game.getturn()) + '\n')
+        currentBoard = game.getBoard()
+        for i in range(len(currentBoard)):
+            for j in range(currentBoard[i]):
+                outputString+='O '
+            outputStgring+='\n'
         await message.channel.send(response)
 client.run(TOKEN)
