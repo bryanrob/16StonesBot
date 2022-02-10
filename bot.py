@@ -1,7 +1,7 @@
 # bot.py
 import os
 import random
-
+import Stones
 import discord
 from dotenv import load_dotenv
 
@@ -38,4 +38,15 @@ async def on_message(message):
         response = random.choice(brooklyn_99_quotes)
         await message.channel.send(response)
 
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    game = [ (os.system('python Stones.py')
+    ) ]
+
+    if message.content == '!play':
+        response = game
+        await message.channel.send(response)
 client.run(TOKEN)
