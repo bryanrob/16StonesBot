@@ -14,5 +14,6 @@ When setting up add command line code:
     pip install python-dotenv
     
    you will also need to make a .env file that is in the same folder as bot.py
+   when running the bot, the game file Stones.py needs to be in the same folder as the bot.py file in order for the import of the game code to the bot to work.
   
   this allows bot to be altered and edited
