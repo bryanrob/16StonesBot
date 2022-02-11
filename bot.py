@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-file=open("token.tkn")
+file=open("token.tkn","r")
 token=file.readline()
 print("Token from \{token.tkn\}: "+token)
 file.close()
