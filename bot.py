@@ -6,7 +6,12 @@ import discord
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+
+file=open("token.tkn","r")
+token=file.readline()
+print("Token from \{token.tkn\}: "+token)
+file.close()
+TOKEN = os.getenv(token)
 
 client = discord.Client()
 
@@ -52,4 +57,11 @@ async def on_message(message):
                 outputString+='O '
             outputString+='\n'
         await message.channel.send(outputString)
+
+    elif message.content=='!take':
+        print("This should be configured to take in arguments.  String should contain '!take', not have only '!take'.")
+
+        await message.channel.send("**'!take'** command received without any arguments.\nSorry, but this command is still in the works.")
+
+
 client.run(TOKEN)
