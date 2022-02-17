@@ -63,7 +63,7 @@ async def on_message(message):
 
             if player2==None:
                 outputString="**Error:** user not found."
-            elif player1==player2:
+            elif player1.id==player2.id:
                 outputString="**Error:** You cannot play against yourself."
             elif player1.id in instances:
                 outputString="**Error:** ["+player1.username+"] is already in an instance."
