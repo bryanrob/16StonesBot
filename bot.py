@@ -88,9 +88,34 @@ async def on_message(message):
         await message.channel.send(outputString)
 
     elif message.content.startswith('!take'):
-        print("This should be configured to take in arguments.  String should contain '!take', not have only '!take'.")
+        user=Player(message.author.id,message.author.name)
+        outputString="**'!take'** command received without any arguments.\nSorry, but this command is still in the works."
+        if message.author.id in instances:
+            instance=instances[message.author.id]
+            splitMessage=message.content.strip().split(" ")
+            
+            if len(splitMessage)!=3:
+                outputString="**Input error:** Command syntax is incorrect."
+            else:
+                isValid=False
+                row,num=0,0
+                makeMove=False
+                try:
+                    row=int(splitMessage[1])
+                    num=int(splitMessage[2])
 
-        await message.channel.send("**'!take'** command received without any arguments.\nSorry, but this command is still in the works.")
+                    makeMove=True
+                except:
+                    outputString="**Input error:** The command arguments can only be integers."
+                finally:
+                    if makeMove:
+                        instance.move(user,row,num)
 
+                        outputString=instance.outputString
+        else:
+            outputString="**Error:** You are not in any existing instance.\nYou can create one using the **!play** command."
+        #print("This should be configured to take in arguments.  String should contain '!take', not have only '!take'.")
+
+        await message.channel.send(outputString)
 
 client.run(TOKEN)
