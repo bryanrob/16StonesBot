@@ -46,7 +46,7 @@ class Instance:
 		for i in range(rows):
 			returnThis+=str(i+1)+") "
 			for j in range(this.game.getBoard()[i]):
-				returnThis+=stones[1]+" "
+				returnThis+=random.choice(stones)+" "
 			returnThis+="\n"
 		
 		return returnThis.strip()
