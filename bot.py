@@ -52,9 +52,11 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    outputString="**An unexpected error has occurred.**\nPlease make sure that the command syntax is correct."
+
     if message.content.startswith('!play'):
         player1=Player(message.author.id,message.author.name)
-        outputString="**An unexpected error has occurred.**\nPlease make sure that the command syntax is correct."
+        
         splitMessage=message.content.strip().split(" ")
 
         if len(splitMessage)==2:
@@ -89,7 +91,7 @@ async def on_message(message):
 
     elif message.content.startswith('!take'):
         user=Player(message.author.id,message.author.name)
-        outputString="**'!take'** command received without any arguments.\nSorry, but this command is still in the works."
+        #outputString="**'!take'** command received without any arguments.\nSorry, but this command is still in the works."
         if message.author.id in instances:
             instance=instances[message.author.id]
             splitMessage=message.content.strip().split(" ")
@@ -112,10 +114,28 @@ async def on_message(message):
                         instance.move(user,row,num)
 
                         outputString=instance.outputString
+            if instance.game.getBoardSum()==1:
+                del instances[instance.players[0].id]
+                del instances[instance.players[1].id]
         else:
             outputString="**Error:** You are not in any existing instance.\nYou can create one using the **!play** command."
         #print("This should be configured to take in arguments.  String should contain '!take', not have only '!take'.")
 
         await message.channel.send(outputString)
 
+    elif message.content.startswith('!quit'):
+        if message.author.id in instances:
+            instance=instances[message.author.id]
+            
+            if instance.players[0].id==message.author.id:
+                outputString="Player 1 ["+instance.players[0].username+"] admits defeat."
+            elif instance.players[1].id==message.author.id:
+                outputString="Player 2 ["+instance.players[1].username+"] admits defeat."
+            del instances[instance.players[0].id]
+            del instances[instance.players[1].id]
+        else:
+            outputString="**Error:** You are not in an active instance."
+
+        await message.channel.send(outputString)
+            
 client.run(TOKEN)
