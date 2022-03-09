@@ -24,12 +24,52 @@ class Instance:
 	def __init__(this,player1,player2):
 		this.game=SixteenStones()
 		this.players=[player1,player2]
+		this.graphicsBoard=[]
 		
-		this.outputString="Game has started between [<@"+str(this.players[0].id)+">] and [<@"+str(this.players[1].id)+">]\n"
-		this.outputString+=this.generateBoardGraphics()
+		this.outputString="The game between [<@"+str(this.players[0].id)+">] and [<@"+str(this.players[1].id)+">] has begun!\n"
+		this.outputString+=this.initializeBoardGraphics()
 	#end function __init__(self,Player,Player)
 
 	#Internal Function(s)
+
+	def initializeBoardGraphics(this):
+		returnThis=""
+		returnThis+="> Turn: "+str(this.game.getTurn())+", Player "+str(this.game.getTurnPlayer())+" [<@"+str(this.players[this.game.getTurnPlayer()-1].id)+">], go.\n"
+
+		stones=[":rock:",":new_moon:",":mountain:",":mountain_snow:",":moyai:"]
+		rowLabels=[":one:",":two:",":three:",":four:",":five:"]
+		rows=this.game.getBoard()
+
+		for i in range(len(rows)):
+			temp=[rowLabels[i]]
+			for j in range(rows[i]):
+				num=random.randint(0,99)
+				if num>94:
+					#print("Moyai generated!")
+					temp.append(stones[len(stones)-1])
+				else:
+					temp.append(random.choice(stones[0:len(stones)-1]))
+			this.graphicsBoard.append(temp)
+
+		returnThis+=this.configureBoardGraphics()
+
+		return returnThis.strip()
+
+	def configureBoardGraphics(this):
+		returnThis=""
+
+		board=this.game.getBoard()
+
+		for i in range(len(board)):
+			if board[i]<len(this.graphicsBoard[i]):
+				this.graphicsBoard[i]=this.graphicsBoard[i][0:(board[i]+1)]
+
+		for i in range(len(this.graphicsBoard)):
+			for j in range(len(this.graphicsBoard[i])):
+				returnThis+=this.graphicsBoard[i][j]
+			returnThis+="\n"
+
+		return returnThis
 
 	#self.generateBoardGraphics(self):
 	#Creates the graphical output of the board.  Is called in other Instance functions to update the 'outputString' value.
@@ -37,21 +77,25 @@ class Instance:
 		returnThis=""
 		
 		if this.game.getBoardSum()!=1:
-			returnThis+="Turn: "+str(this.game.getTurn())+", Player "+str(this.game.getTurnPlayer())+" [<@"+str(this.players[this.game.getTurnPlayer()-1].id)+">], go.\n" 
+			returnThis+="> Turn: "+str(this.game.getTurn())+", Player "+str(this.game.getTurnPlayer())+" [<@"+str(this.players[this.game.getTurnPlayer()-1].id)+">], go.\n" 
 
-		stones=["o","O","0"]
+		#stones=["o","O","0"]
+		#
+		#rows=len(this.game.getBoard())
+		#
+		#for i in range(rows):
+		#	returnThis+=str(i+1)+") "
+		#	for j in range(this.game.getBoard()[i]):
+		#		returnThis+=random.choice(stones)+" "
+		#	returnThis+="\n"
 		
-		rows=len(this.game.getBoard())
-		
-		for i in range(rows):
-			returnThis+=str(i+1)+") "
-			for j in range(this.game.getBoard()[i]):
-				returnThis+=random.choice(stones)+" "
-			returnThis+="\n"
-		
+		returnThis+=this.configureBoardGraphics()
+
 		return returnThis.strip()
 	#end function generateBoardGraphics(self)
-				
+
+	#Public Function(s)
+
 	#move(self,Player,int,int)
 	#Much like the move function in the SixteenStones class, the move function of Instance attempts to make a
 	#play for a user.  There are a few checks that occur here, such as the state of the game (finished or ongoing),
@@ -72,7 +116,7 @@ class Instance:
 															#offset from the index by 1, thus the correction is made here.
 			
 			if this.game.getBoardSum()==1:
-				this.outputString="Game over.\n[<@"+this.players[turnPlayer].id+">] wins!\n"+this.generateBoardGraphics()
+				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"+this.generateBoardGraphics()
 			else:			
 				if result:
 					this.outputString=this.generateBoardGraphics()
