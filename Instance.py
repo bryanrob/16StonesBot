@@ -25,7 +25,7 @@ class Instance:
 		this.game=SixteenStones()
 		this.players=[player1,player2]
 		
-		this.outputString="Game has started between ["+this.players[0].username+"] and ["+this.players[1].username+"]\n"
+		this.outputString="Game has started between [<@"+str(this.players[0].id)+">] and [<@"+str(this.players[1].id)+">]\n"
 		this.outputString+=this.generateBoardGraphics()
 	#end function __init__(self,Player,Player)
 
@@ -37,7 +37,7 @@ class Instance:
 		returnThis=""
 		
 		if this.game.getBoardSum()!=1:
-			returnThis+="Turn: "+str(this.game.getTurn())+", Player "+str(this.game.getTurnPlayer())+" ["+this.players[this.game.getTurnPlayer()-1].username+"], go.\n" 
+			returnThis+="Turn: "+str(this.game.getTurn())+", Player "+str(this.game.getTurnPlayer())+" [<@"+str(this.players[this.game.getTurnPlayer()-1].id)+">], go.\n" 
 
 		stones=["o","O","0"]
 		
@@ -65,14 +65,14 @@ class Instance:
 		turnPlayer=this.game.getTurnPlayer()-1
 
 		if player.id!=this.players[turnPlayer].id:
-			this.outputString+="It is not your turn, "+player.username+"."
+			this.outputString+="It is not your turn, <@"+str(player.id)+">."
 		else:	
 			result,resultMessage=this.game.move(row-1,num)	#The row input is supposed to be the index of the gameBoard
 															#value in this game.  The player is expected to input a value
 															#offset from the index by 1, thus the correction is made here.
 			
 			if this.game.getBoardSum()==1:
-				this.outputString="Game over.\n["+this.players[turnPlayer].username+"] wins!\n"+this.generateBoardGraphics()
+				this.outputString="Game over.\n[<@"+this.players[turnPlayer].id+">] wins!\n"+this.generateBoardGraphics()
 			else:			
 				if result:
 					this.outputString=this.generateBoardGraphics()
