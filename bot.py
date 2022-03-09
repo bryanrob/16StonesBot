@@ -87,7 +87,7 @@ async def on_message(message):
         #    for j in range(currentBoard[i]):
         #        outputString+='O '
         #    outputString+='\n'
-        await message.channel.send(outputString)
+        #await message.channel.send(outputString)
 
     elif message.content.startswith('!take'):
         user=Player(message.author.id,message.author.name)
@@ -121,7 +121,7 @@ async def on_message(message):
             outputString="**Error:** You are not in any existing instance.\nYou can create one using the **!play** command."
         #print("This should be configured to take in arguments.  String should contain '!take', not have only '!take'.")
 
-        await message.channel.send(outputString)
+        #await message.channel.send(outputString)
 
     elif message.content.startswith('!quit'):
         if message.author.id in instances:
@@ -136,6 +136,14 @@ async def on_message(message):
         else:
             outputString="**Error:** You are not in an active instance."
 
-        await message.channel.send(outputString)
+        #await message.channel.send(outputString)
+
+    elif message.content.startswith('!help'):
+        outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n\```!play @<user>\n\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>\n\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit\n\nGood luck, and have fun!"
+        
+                
+    await message.channel.send(outputString)
+
+    
             
 client.run(TOKEN)
