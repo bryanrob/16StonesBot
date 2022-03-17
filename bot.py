@@ -101,27 +101,33 @@ async def on_message(message):
 
             if len(splitMessage)==2:
                 #print("Player 1 id: "+str(message.author.id)+"\nPlayer 2 id: "+splitMessage[1][3:-1])
+                userFound=False
+                targetUser=0
                 try:
-                    targetUser= await client.fetch_user(int(splitMessage[1][3:-1]))
+                    try:
+                        targetUser= await client.fetch_user(int(splitMessage[1][3:-1]))
+                    except:
+                        print("Mobile input detected.")
+                        targetUser= await client.fetch_user(int(splitMessage[1][2:-1]))
+                    userFound=True
+                    player2=Player(targetUser.id,targetUser.name)
                 except:
-                    print("Mobile input detected.")
-                    targetUser= await client.fetch_user(int(splitMessage[1][2:-1]))
-                player2=Player(targetUser.id,targetUser.name)
-
-                if player2==None:
                     outputString="**Error:** user not found."
-                elif player1.id==player2.id:
-                    outputString="**Error:** You cannot play against yourself."
-                elif player1.id in instances:
-                    outputString="**Error:** ["+player1.username+"] is already in an instance."
-                elif player2.id in instances:
-                    outputString="**Error:** ["+player2.username+"] is already in an instance."
-                else:
-                    instance=Instance(player1,player2)
-                    instances[player1.id]=instance
-                    instances[player2.id]=instance
+                
 
-                    outputString=instance.outputString
+                if userFound:
+                    if player1.id==player2.id:
+                        outputString="**Error:** You cannot play against yourself."
+                    elif player1.id in instances:
+                        outputString="**Error:** ["+player1.username+"] is already in an instance."
+                    elif player2.id in instances:
+                        outputString="**Error:** ["+player2.username+"] is already in an instance."
+                    else:
+                        instance=Instance(player1,player2)
+                        instances[player1.id]=instance
+                        instances[player2.id]=instance
+
+                        outputString=instance.outputString
             else:
                 outputString="**Input error:** Ping the user who you want to play against.\nExample: !play @exampleUser"
 
@@ -167,8 +173,31 @@ async def on_message(message):
                 outputString=instance
 
         elif message.content.startswith('!help'):
-            outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n\```!play @<user>\n\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>\n\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit\n\nGood luck, and have fun!"
+            outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```\nGood luck, and have fun!"
                     
+        elif message.content.startswith('!fu'):
+            found,instance=removeInstance(message.author.id)
+
+            if found:
+                outputString="**(ノಠ益ಠ)ノ彡┻━┻ "
+
+                stones=" ﾟ.*・｡ﾟ"
+                boardSum=instance.game.getBoardSum()
+                if len(stones)<boardSum:
+                    n=len(stones)
+                else:
+                    n=boardSum
+                for i in range(n):
+                    outputString+=stones[i]
+
+                outputString+="**\n"
+                if instance.players[0].id==message.author.id:
+                    outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
+                elif instance.players[1].id==message.author.id:
+                    outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
+
+            else:
+                outputString=instance
         await message.channel.send(outputString)
 
 def removeInstance(id):
