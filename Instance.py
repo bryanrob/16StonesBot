@@ -21,10 +21,11 @@ class Instance:
 	#will be updated.  This value must be retreived after every action to show the game status.
 	
 	#Initializer
-	def __init__(this,player1,player2):
+	def __init__(this,guildId,player1,player2):
 		this.game=SixteenStones()
 		this.players=[player1,player2]
 		this.graphicsBoard=[]
+		this.guild=guildId
 		
 		this.outputString="The game between [<@"+str(this.players[0].id)+">] and [<@"+str(this.players[1].id)+">] has begun!\n"
 		this.outputString+=this.initializeBoardGraphics()

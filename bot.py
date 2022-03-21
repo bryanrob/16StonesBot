@@ -118,18 +118,20 @@ async def on_message(message):
                 if userFound:
                     if player1.id==player2.id:
                         outputString="**Error:** You cannot play against yourself."
+                    elif player2==client.user.id:
+                        outputString="**Error:** I cannot play Sixteen Stones against you."
                     elif player1.id in instances:
                         outputString="**Error:** ["+player1.username+"] is already in an instance."
                     elif player2.id in instances:
                         outputString="**Error:** ["+player2.username+"] is already in an instance."
                     else:
-                        instance=Instance(player1,player2)
+                        instance=Instance(message.guild.id,player1,player2)
                         instances[player1.id]=instance
                         instances[player2.id]=instance
 
                         outputString=instance.outputString
             else:
-                outputString="**Input error:** Ping the user who you want to play against.\nExample: !play @exampleUser"
+                outputString="**Input error:** Ping the user who you want to play against.\nExample:/n> !play @exampleUser"
 
         elif message.content.startswith('!take'):
             user=Player(message.author.id,message.author.name)
@@ -179,7 +181,7 @@ async def on_message(message):
             found,instance=removeInstance(message.author.id)
 
             if found:
-                outputString="**(ノಠ益ಠ)ノ彡┻━┻ "
+                outputString="**> (ノಠ益ಠ)ノ彡┻━┻ "
 
                 stones=" ﾟ.*・｡ﾟ"
                 boardSum=instance.game.getBoardSum()
@@ -190,15 +192,38 @@ async def on_message(message):
                 for i in range(n):
                     outputString+=stones[i]
 
+                if instance.game.getTurn()<=2:
+                    outputString+="ヾ(ﾟдﾟ)ﾉ゛\n```\t\t\tBut we just started!```"
+
                 outputString+="**\n"
                 if instance.players[0].id==message.author.id:
                     outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
                 elif instance.players[1].id==message.author.id:
                     outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
-
             else:
                 outputString=instance
+        elif message.content.startswith("!clearInstances"):
+            if message.author.guild_permissions.administrator:
+                messageGuild=message.guild.id
+                outputString="**yeet**\n```All guild instances removed.```"
+                toDelete=[]
+
+                for instance in instances:
+                    if messageGuild==instances[instance].guild:
+                        if instances[instance].players[0].id not in toDelete:
+                            toDelete.append(instances[instance].players[0].id)
+                        if instances[instance].players[1].id not in toDelete:
+                            toDelete.append(instances[instance].players[1].id)
+                if len(toDelete)==0:
+                    outputString="**Error:** No running instances found."
+                else:
+                    for i in toDelete:
+                        del instances[i]
+            else:
+                outputString="**Error:** You are not a server administrator."
         await message.channel.send(outputString)
+#End of on_message()
+
 
 def removeInstance(id):
     if id in instances:
