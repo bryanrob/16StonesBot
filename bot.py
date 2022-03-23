@@ -90,17 +90,16 @@ async def on_message(message):
     outputString="**An unexpected error has occurred.**\nPlease make sure that the command syntax is correct."
 
     if message.content.startswith('!'):
-        #sendOutput=True
         outputString="**Error: unknown command.**\nPlease make sure your syntax is correct and try again."
 
         if message.content.startswith('!play'):
-            #print(message.content)
+            #print(message.content) #Debugging
             player1=Player(message.author.id,message.author.name)
             
             splitMessage=message.content.strip().split(" ")
 
             if len(splitMessage)==2:
-                #print("Player 1 id: "+str(message.author.id)+"\nPlayer 2 id: "+splitMessage[1][3:-1])
+                #print("Player 1 id: "+str(message.author.id)+"\nPlayer 2 id: "+splitMessage[1][3:-1]) #Debugging
                 userFound=False
                 targetUser=0
                 try:
@@ -224,7 +223,11 @@ async def on_message(message):
         await message.channel.send(outputString)
 #End of on_message()
 
-
+#removeInstance(id:int) : Boolean, Instance OR String;
+#Deletes an instance populated by the player with the specified {id}.
+#Returns True and the Instance object that was just deleted from the
+#dictionary if the {id} is present in an instance.  Otherwise, returns
+#False and a string containing a default error message.
 def removeInstance(id):
     if id in instances:
         instance=instances[id]
