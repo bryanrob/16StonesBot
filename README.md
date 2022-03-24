@@ -1,7 +1,7 @@
 # 16StonesBot
 CapstoneProject for Spring of 2022
 ## Summary
-This is a simple Discord bot program that can operate multiple instances of Sixteen Stones for your Discord server. Players are able to compete in a 1v1 match, and display leaderboard 
+This is a simple Discord bot program that can operate multiple instances of Sixteen Stones for your Discord server.
 
 ## Setup
 This bot will require Python 3 in order to run.  Once you have that, proceed to the instructions below:
