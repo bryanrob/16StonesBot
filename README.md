@@ -30,7 +30,10 @@ The most useful ones are as follows:
   - If the user is in a running instance, the player will take the specified amount of **stones** from the specified **row**.
 - **quit**
   - If the user is in a running instance, the player will forfeit the game and close the instance.
+- **leaderboard**
+  - User calls leaderboard instance. 
 
 ## Main Developers
 - [Jake (phantump)](https://github.com/phantump)
 - [Robert (bryanrob)](https://github.com/bryanrob)
+- [Adonis Linares-Velasquez(godadonis)](https://github.com/Godadonis)
