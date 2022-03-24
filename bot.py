@@ -3,10 +3,13 @@ from asyncio.windows_events import NULL
 import os
 from posixpath import split
 import random
+from unittest import result
 from Stones import SixteenStones
 from Instance import Instance, Player
 import discord
 from dotenv import load_dotenv
+
+prefix="!"
 
 load_dotenv()
 
@@ -89,35 +92,23 @@ async def on_message(message):
 
     outputString="**An unexpected error has occurred.**\nPlease make sure that the command syntax is correct."
 
-    if message.content.startswith('!'):
+    if message.content.startswith(prefix):
         outputString="**Error: unknown command.**\nPlease make sure your syntax is correct and try again."
 
-        if message.content.startswith('!play'):
+        if message.content.startswith(prefix+'play'):
             #print(message.content) #Debugging
             player1=Player(message.author.id,message.author.name)
             
             splitMessage=message.content.strip().split(" ")
 
             if len(splitMessage)==2:
-                #print("Player 1 id: "+str(message.author.id)+"\nPlayer 2 id: "+splitMessage[1][3:-1]) #Debugging
-                userFound=False
-                targetUser=0
-                try:
-                    try:
-                        targetUser= await client.fetch_user(int(splitMessage[1][3:-1]))
-                    except:
-                        print("Mobile input detected.")
-                        targetUser= await client.fetch_user(int(splitMessage[1][2:-1]))
-                    userFound=True
-                    player2=Player(targetUser.id,targetUser.name)
-                except:
-                    outputString="**Error:** user not found."
-                
+                userFound,targetUser=await getUserInMessage(message.content)
 
                 if userFound:
+                    player2=Player(targetUser.id,targetUser.name)
                     if player1.id==player2.id:
                         outputString="**Error:** You cannot play against yourself."
-                    elif player2==client.user.id:
+                    elif player2.id==client.user.id:
                         outputString="**Error:** I cannot play Sixteen Stones against you."
                     elif player1.id in instances:
                         outputString="**Error:** ["+player1.username+"] is already in an instance."
@@ -129,10 +120,12 @@ async def on_message(message):
                         instances[player2.id]=instance
 
                         outputString=instance.outputString
+                else:
+                    outputString=targetUser
             else:
                 outputString="**Input error:** Ping the user who you want to play against.\nExample:/n> !play @exampleUser"
 
-        elif message.content.startswith('!take'):
+        elif message.content.startswith(prefix+'take'):
             user=Player(message.author.id,message.author.name)
             if message.author.id in instances:
                 instance=instances[message.author.id]
@@ -162,7 +155,7 @@ async def on_message(message):
             else:
                 outputString="**Error:** You are not in any existing instance, <@"+str(message.author.id)+">.\nYou can create one using the **!play** command."
 
-        elif message.content.startswith('!quit'):
+        elif message.content.startswith(prefix+'quit'):
             found,instance=removeInstance(message.author.id)
 
             if found:
@@ -173,10 +166,10 @@ async def on_message(message):
             else:
                 outputString=instance
 
-        elif message.content.startswith('!help'):
+        elif message.content.startswith(prefix+'help'):
             outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```\nGood luck, and have fun!"
                     
-        elif message.content.startswith('!fu'):
+        elif message.content.startswith(prefix+'fu'):
             found,instance=removeInstance(message.author.id)
 
             if found:
@@ -192,7 +185,7 @@ async def on_message(message):
                     outputString+=stones[i]
 
                 if instance.game.getTurn()<=2:
-                    outputString+="ヾ(ﾟдﾟ)ﾉ゛\n```\t\t\tBut we just started!```"
+                    outputString+="ヾ(ﾟдﾟ)ﾉ゛\n```\t\t\t\t\tBut we just started!```"
 
                 outputString+="**\n"
                 if instance.players[0].id==message.author.id:
@@ -201,7 +194,7 @@ async def on_message(message):
                     outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
             else:
                 outputString=instance
-        elif message.content.startswith("!clearInstances"):
+        elif message.content.startswith(prefix+"clearInstances"):
             if message.author.guild_permissions.administrator:
                 messageGuild=message.guild.id
                 outputString="**yeet**\n```All guild instances removed.```"
@@ -220,6 +213,24 @@ async def on_message(message):
                         del instances[i]
             else:
                 outputString="**Error:** You are not a server administrator."
+        elif message.content.startswith(prefix+"clearInstance"):
+            if message.author.guild_permissions.administrator:
+                splitMessage=message.content.strip().split(" ")
+                if len(splitMessage)==2:
+                    userFound,user=await getUserInMessage(message.content)
+                    #print(user)
+                    if userFound:
+                        success,instance=removeInstance(user.id)
+                        if success:
+                            outputString="Removed instance between <@"+str(instance.players[0].id)+"> and <@"+str(instance.players[1].id)+">."
+                        else:
+                            outputString="**Error:** Specified user is not in an instance."
+                    else:
+                        outputString=user
+                else:
+                    outputString="**Input error:** Ping the user in the instance you want to delete.\nExample:\n```!clearInstance @<user>```"
+            else:
+                outputString="**Error:** You are not a server administrator."
         await message.channel.send(outputString)
 #End of on_message()
 
@@ -236,4 +247,31 @@ def removeInstance(id):
         return True,instance
     return False,"**Error:** You are not in an active instance, <@"+str(id)+">."
             
+#getUserInMessage(message:String) : Boolean, discord.User OR String;
+#Obtains the user who's specified within the message containing only
+#the command and the mention of the user.  If the message does NOT
+#meet the above criteria, then the function will return False and
+#a String default error message.  Otherwise, it will attempt to get
+#the user data from Discord.  If the user was not found, the function
+#will return False and a default error message stating that the user
+#wasn't found.  If the user was found, then it will return True and
+#the discord.User object of the specified user.
+async def getUserInMessage(message):
+    splitMessage=message.strip().split(" ")
+    #print(splitMessage[1][3:-1]) #debugging...
+    if len(splitMessage)==2:
+        userFound=False
+        try:
+            try:
+                result= await client.fetch_user(int(splitMessage[1][3:-1]))
+            except:
+                #print("Mobile input detected.") #debugging...
+                result= await client.fetch_user(int(splitMessage[1][2:-1]))
+            userFound=True
+        except:
+            result="**Error:** user not found."
+        finally:
+            return userFound,result
+    else:
+        return False,"**Syntax Error:** Enter only the command and its user argument."
 client.run(TOKEN)
