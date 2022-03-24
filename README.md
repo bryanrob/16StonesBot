@@ -34,4 +34,4 @@ The most useful ones are as follows:
 ## Main Developers
 - [Jake (phantump)](https://github.com/phantump)
 - [Robert (bryanrob)](https://github.com/bryanrob)
-- [Adonis Linares-Velasquez](https://github.com/Godadonis)
+- [Adonis Linares-Velasquez(godadonis)](https://github.com/Godadonis)
