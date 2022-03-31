@@ -1,5 +1,6 @@
 # bot.py
 from asyncio.windows_events import NULL
+import atexit
 import os
 from posixpath import split
 import random
@@ -8,6 +9,7 @@ from Stones import SixteenStones
 from Instance import Instance, Player
 import discord
 from dotenv import load_dotenv
+from Database import DB
 
 prefix="!"
 
@@ -53,6 +55,7 @@ file.close()
 #TOKEN = os.getenv(token)
 
 client = discord.Client()
+db=DB()
 
 instances={}
 
@@ -231,6 +234,35 @@ async def on_message(message):
                     outputString="**Input error:** Ping the user in the instance you want to delete.\nExample:\n```!clearInstance @<user>```"
             else:
                 outputString="**Error:** You are not a server administrator."
+
+        elif message.content.startswith(prefix+"leaderbord"):
+            splitMessage=message.content.strip().split(" ")
+            if len(splitMessage)==2:
+                if splitMessage[1][0].lower()=='w':
+                    rows=db.getOrderByWins(message.guild.id)
+
+                    outputString+="> **__Leaderbord by Wins__**\n"
+                    #
+                    #Enter addition to output string here.
+                    #
+                elif splitMessage[1][0].lower()=='l':
+                    rows=db.getOrderByLosses(message.guild.id)
+
+                    outputString+="> **__Leaderbord by Losses__**\n"
+                    #
+                    #Enter addition to output string here.
+                    #
+                elif splitMessage[1][0].lower()=='r':
+                    rows=db.getOrderByWinLossRatio(message.guild.id)
+
+                    outputString+="> **__Leaderbord by Win/Loss Ratio__**\n"
+                    #
+                    #Enter addition to output string here.
+                    #
+                else:
+                    outputString="**Input error:** Please specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```> W = Wins\n> L = Losses\n> R = Win/Loss Ratio"
+            else:
+                outputString="**Input error:** Invalid amount of arguments passed.\nPlease make sure that your syntax is correct."
         await message.channel.send(outputString)
 #End of on_message()
 
@@ -275,3 +307,8 @@ async def getUserInMessage(message):
     else:
         return False,"**Syntax Error:** Enter only the command and its user argument."
 client.run(TOKEN)
+
+import atexit
+@atexit.register
+def terminate():
+    db.close()

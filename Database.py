@@ -62,12 +62,12 @@ class DB:
         if losses==0:
             losses=1
         #print("Data from wins at ("+str(userid)+"): "+str(wins))
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set wins={wins+1} where id={userid} and guild={guildid}")
+        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[2]}={wins+1} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
 
         #update win/loss ratio
         w_l_ratio=float(wins+1)/float(losses)
         #print("New win/loss ratio is:"+str(w_l_ratio))
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set w_l_ratio={w_l_ratio} where id={userid} and guild={guildid}")
+        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         this.database.commit()
 
     def addLoss(this,userid,guildid):
@@ -78,24 +78,36 @@ class DB:
         #get Losses
         losses=data[3]+1
 
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set losses={losses} where id={userid} and guild={guildid}")
+        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[3]}={losses} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         w_l_ratio=float(wins)/float(losses)
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set w_l_ratio={w_l_ratio} where id={userid} and guild={guildid}")
+        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         this.database.commit()
 
     def addMoyai(this,userid,guildid,amount):
         data=this.getRowById(userid,guildid)
 
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set moyai={data[5]+amount} where id={userid} and guild={guildid}")
+        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[5]}={data[5]+amount} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         this.database.commit()
 
     def getRowById(this,userid,guildid):
-        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where id={userid} and guild={guildid}")
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         data=this.cursor.fetchall()
         return data[0]
 
     def getOrderBy(this,ind):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} order by {this.columns[ind]} desc")
+        return this.cursor.fetchall()
+
+    def getOrderByWins(this,guildid):
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[1]}={guildid} order by {this.columns[2]} desc, {this.columns[3]} asc limit 5")
+        return this.cursor.fetchall()
+
+    def getOrderByWinLossRatio(this,guildid):
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[1]}={guildid} order by {this.columns[4]} desc, {this.columns[2]} asc, {this.columns[3]} desc limit 5")
+        return this.cursor.fetchall()
+
+    def getOrderByLosses(this,guildid):
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[1]}={guildid} order by {this.columns[3]} desc, {this.columns[2]} asc limit 5")
         return this.cursor.fetchall()
 
     def close(this):
@@ -142,6 +154,16 @@ def main():
     print("User data sorted by wins:")
     for el in rowObs:
         print(el.toString())
+
+    rows=db.getOrderByWins(1)
+    rowObs=[]
+    for row in rows:
+        rowObs.append(Row(row[0],row[1],row[2],row[3],row[4],row[5]))
+
+    print("User data from guild 1 sorted by wins (max:2):")
+    for el in rowObs:
+        print(el.toString())        
+
 
     db.close()
 
