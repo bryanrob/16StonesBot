@@ -89,7 +89,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    sendOutput=False
     if message.author == client.user:
         return
 
@@ -186,11 +185,10 @@ async def on_message(message):
                     n=boardSum
                 for i in range(n):
                     outputString+=stones[i]
-
+                outputString+="ヾ(ﾟдﾟ)ﾉ゛**\n"
                 if instance.game.getTurn()<=2:
-                    outputString+="ヾ(ﾟдﾟ)ﾉ゛\n```\t\t\t\t\tBut we just started!```"
+                    outputString+="\n```\t\t\t\t\tBut we just started!```\n"
 
-                outputString+="**\n"
                 if instance.players[0].id==message.author.id:
                     outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
                 elif instance.players[1].id==message.author.id:
@@ -242,25 +240,31 @@ async def on_message(message):
                     rows=db.getOrderByWins(message.guild.id)
 
                     outputString+="> **__Leaderbord by Wins__**\n"
-                    #
-                    #Enter addition to output string here.
-                    #
+
+                    outputString+=await generateLeaderboardData(rows)
+                    
                 elif splitMessage[1][0].lower()=='l':
                     rows=db.getOrderByLosses(message.guild.id)
 
                     outputString+="> **__Leaderbord by Losses__**\n"
-                    #
-                    #Enter addition to output string here.
-                    #
+                    
+                    outputString+=await generateLeaderboardData(rows)
+                    
                 elif splitMessage[1][0].lower()=='r':
                     rows=db.getOrderByWinLossRatio(message.guild.id)
 
                     outputString+="> **__Leaderbord by Win/Loss Ratio__**\n"
-                    #
-                    #Enter addition to output string here.
-                    #
+                    
+                    outputString+=await generateLeaderboardData(rows)
+                    
                 else:
                     outputString="**Input error:** Please specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```> W = Wins\n> L = Losses\n> R = Win/Loss Ratio"
+            elif message.content.startswith(prefix+"register"):
+                result=db.addNewUser(message.author.id,message.guild.id)
+                if result:
+                    outputString=f"<@{message.author.id}>, you have been successfully registered to this server's leaderboard database."
+                else:
+                    outputString=f"<@{message.author.id}>, you are already registered in this server's leaderboard database."
             else:
                 outputString="**Input error:** Invalid amount of arguments passed.\nPlease make sure that your syntax is correct."
         await message.channel.send(outputString)
@@ -306,6 +310,21 @@ async def getUserInMessage(message):
             return userFound,result
     else:
         return False,"**Syntax Error:** Enter only the command and its user argument."
+
+async def generateLeaderboardData(data):
+    outputString="{:^4s}|{:^25s}|{:^6s}|{:^6s}|{:^9s}|{:^5s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^6s}+{hf:-^6s}+{hf:-^9s}+{hf:-^5s}\n".format("Pos.","User","Wins","Losses","W/L Ratio","Moyai",hf="")
+    for i in range(len(data)):
+        outputString+="{:>4d}|".format(i+1)
+        user=await client.fetch_user(data[i][0])
+        outputString+="{:^25d}|{:^6d}|{:^6d}|{:^9.2f}|{:^5d}\n".format(user.display_name,data[i][2],data[i][3],data[i][4],data[i][5])
+    #outputString="User\t|Wins\t|Losses\t|W/L Ratio\t|Moyai"
+    #for i in range(len(data)):
+    #    outputString+=f"{i+1}) "
+        
+    #    outputString+=f"**{user.display_name}**, {data[i][2]}, {data[i][3]}, {data[i][4]}, {data[i][5]}\n"
+    return outputString
+
+
 client.run(TOKEN)
 
 import atexit

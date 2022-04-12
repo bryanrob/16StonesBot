@@ -1,3 +1,5 @@
 __pycache__
 token.tkn
 db.creds
+logs
+ErrorLogger.py
