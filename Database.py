@@ -42,8 +42,9 @@ class DB:
     #the same guild, however, then the duplicate row will not be added.  Returns a boolean
     #based on this: if an entry is added, returns True.  Otherwise, returns False.
     def addNewUser(this,userid,guildid):
-        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}='{userid}' and {this.columns[1]}='{guildid}'")
         data=this.cursor.fetchall()
+        print(f"Attempting to add user {userid} from {guildid} to database.\nDuplicate entries found:{len(data)}")
 
         if len(data)==0:
             this.cursor.execute(f"insert ignore into {this.databaseName}.{this.tableName} ({this.columns[0]},{this.columns[1]},{this.columns[2]},{this.columns[3]},{this.columns[4]},{this.columns[5]}) values ('{userid}','{guildid}','{0}','{0}','{0.0}','{0}')")

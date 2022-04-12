@@ -152,6 +152,16 @@ async def on_message(message):
 
                             outputString=instance.outputString
                 if instance.game.getBoardSum()==1:
+                    #looser=instance.game.getTurn()%2
+                    #if looser==0:
+                    #    winrar=1
+                    #else:
+                    #    winrar=0
+                    #db.addWin(instance.players[winrar].id,message.guild.id)
+                    #db.addLoss(instance.players[looser].id,message.guild.id)
+
+                    distributeWinLoss(instance,message.guild.id)
+                    
                     del instances[instance.players[0].id]
                     del instances[instance.players[1].id]
             else:
@@ -162,8 +172,12 @@ async def on_message(message):
 
             if found:
                 if instance.players[0].id==message.author.id:
+                    db.addLoss(instance.players[0].id,message.guild.id)
+                    db.addWin(instance.players[1].id,message.guild.id)
                     outputString="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
                 elif instance.players[1].id==message.author.id:
+                    db.addLoss(instance.players[1].id,message.guild.id)
+                    db.addWin(instance.players[0].id,message.guild.id)
                     outputString="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
             else:
                 outputString=instance
@@ -175,7 +189,7 @@ async def on_message(message):
             found,instance=removeInstance(message.author.id)
 
             if found:
-                outputString="**> (ノಠ益ಠ)ノ彡┻━┻ "
+                outputString="> ** (ノಠ益ಠ)ノ彡┻━┻ "
 
                 stones=" ﾟ.*・｡ﾟ"
                 boardSum=instance.game.getBoardSum()
@@ -185,13 +199,17 @@ async def on_message(message):
                     n=boardSum
                 for i in range(n):
                     outputString+=stones[i]
-                outputString+="ヾ(ﾟдﾟ)ﾉ゛**\n"
+                outputString+="ヾ(ﾟдﾟ)ﾉ゛**"
                 if instance.game.getTurn()<=2:
                     outputString+="\n```\t\t\t\t\tBut we just started!```\n"
 
                 if instance.players[0].id==message.author.id:
+                    db.addLoss(instance.players[0].id,message.guild.id)
+                    db.addWin(instance.players[1].id,message.guild.id)
                     outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
                 elif instance.players[1].id==message.author.id:
+                    db.addLoss(instance.players[1].id,message.guild.id)
+                    db.addWin(instance.players[0].id,message.guild.id)
                     outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
             else:
                 outputString=instance
@@ -233,7 +251,8 @@ async def on_message(message):
             else:
                 outputString="**Error:** You are not a server administrator."
 
-        elif message.content.startswith(prefix+"leaderbord"):
+        elif message.content.startswith(prefix+"leaderboard"):
+            outputString=""
             splitMessage=message.content.strip().split(" ")
             if len(splitMessage)==2:
                 if splitMessage[1][0].lower()=='w':
@@ -259,14 +278,15 @@ async def on_message(message):
                     
                 else:
                     outputString="**Input error:** Please specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```> W = Wins\n> L = Losses\n> R = Win/Loss Ratio"
-            elif message.content.startswith(prefix+"register"):
-                result=db.addNewUser(message.author.id,message.guild.id)
-                if result:
-                    outputString=f"<@{message.author.id}>, you have been successfully registered to this server's leaderboard database."
-                else:
-                    outputString=f"<@{message.author.id}>, you are already registered in this server's leaderboard database."
             else:
                 outputString="**Input error:** Invalid amount of arguments passed.\nPlease make sure that your syntax is correct."
+
+        elif message.content.startswith(prefix+"register"):
+            result=db.addNewUser(message.author.id,message.guild.id)
+            if result:
+                outputString=f"<@{message.author.id}>, you have been successfully registered to this server's leaderboard database."
+            else:
+                outputString=f"<@{message.author.id}>, you are already registered in this server's leaderboard database."
         await message.channel.send(outputString)
 #End of on_message()
 
@@ -312,17 +332,28 @@ async def getUserInMessage(message):
         return False,"**Syntax Error:** Enter only the command and its user argument."
 
 async def generateLeaderboardData(data):
-    outputString="{:^4s}|{:^25s}|{:^6s}|{:^6s}|{:^9s}|{:^5s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^6s}+{hf:-^6s}+{hf:-^9s}+{hf:-^5s}\n".format("Pos.","User","Wins","Losses","W/L Ratio","Moyai",hf="")
+    outputString="```{:^4s}|{:^25s}|{:^6s}|{:^6s}|{:^9s}|{:^5s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^6s}+{hf:-^6s}+{hf:-^9s}+{hf:-^5s}\n".format("Pos.","User","Wins","Losses","W/L Ratio","Moyai",hf="")
     for i in range(len(data)):
         outputString+="{:>4d}|".format(i+1)
         user=await client.fetch_user(data[i][0])
-        outputString+="{:^25d}|{:^6d}|{:^6d}|{:^9.2f}|{:^5d}\n".format(user.display_name,data[i][2],data[i][3],data[i][4],data[i][5])
+        outputString+="{:^25s}|{:^6d}|{:^6d}|{:^9.2f}|{:^5d}\n".format(user.display_name,data[i][2],data[i][3],data[i][4],data[i][5])
     #outputString="User\t|Wins\t|Losses\t|W/L Ratio\t|Moyai"
     #for i in range(len(data)):
     #    outputString+=f"{i+1}) "
         
     #    outputString+=f"**{user.display_name}**, {data[i][2]}, {data[i][3]}, {data[i][4]}, {data[i][5]}\n"
+    outputString+="```"
     return outputString
+
+def distributeWinLoss(instance,guildid):
+    looser=instance.game.getTurn()%2
+    if looser==0:
+        winrar=1
+    else:
+        winrar=0
+    db.addWin(instance.players[winrar].id,guildid)
+    db.addLoss(instance.players[looser].id,guildid)
+
 
 
 client.run(TOKEN)
