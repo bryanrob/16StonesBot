@@ -57,8 +57,11 @@ file.close()
 client = discord.Client()
 db=DB()
 
+print("Creating instances library...")
 instances={}
+print("Instance library initialized!")
 
+print("Logging into Discord...")
 @client.event
 async def on_ready():
     print(f'{client.user.name} has connected to Discord!')
@@ -148,7 +151,10 @@ async def on_message(message):
                         outputString="**Input error:** The command arguments can only be integers."
                     finally:
                         if makeMove:
-                            instance.move(user,row,num)
+                            moyaiFound,moyaiCounter=instance.move(user,row,num)
+
+                            if moyaiFound:
+                                db.addMoyai(message.author.id,message.guild.id,moyaiCounter)
 
                             outputString=instance.outputString
                 if instance.game.getBoardSum()==1:
@@ -183,7 +189,7 @@ async def on_message(message):
                 outputString=instance
 
         elif message.content.startswith(prefix+'help'):
-            outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```\nGood luck, and have fun!"
+            outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```To view the leaderboards, use:```!leaderboard <arg>```Keep in mind, however, that **your played games will __NOT__ be tracked on the leaderboard until you complete your leaderboard registration!**\nYou can do this by using the `!register` command.\nYou can also remove your leaderboard data at anytime using the `!unregister` command.\n\nGood luck, and have fun!"
                     
         elif message.content.startswith(prefix+'fu'):
             found,instance=removeInstance(message.author.id)
@@ -259,27 +265,58 @@ async def on_message(message):
                     rows=db.getOrderByWins(message.guild.id)
 
                     outputString+="> **__Leaderbord by Wins__**\n"
+                    outputString="```{:^4s}|{:^25s}|{:^6s}|{:^6s}|{:^9s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^6s}+{hf:-^6s}+{hf:-^9s}\n".format("Pos.","User","Wins","Losses","W/L Ratio",hf="")
+                    for i in range(len(rows)):
+                        outputString+="{:>4d}|".format(i+1)
+                        user=await client.fetch_user(rows[i][0])
+                        outputString+="{:^25s}|{:^6d}|{:^6d}|{:^9.2f}\n".format(user.display_name,rows[i][2],rows[i][3],rows[i][4])
+                    outputString+="```"
 
-                    outputString+=await generateLeaderboardData(rows)
+                    #outputString+=await generateLeaderboardData(rows)
                     
                 elif splitMessage[1][0].lower()=='l':
                     rows=db.getOrderByLosses(message.guild.id)
 
                     outputString+="> **__Leaderbord by Losses__**\n"
+                    outputString="```{:^4s}|{:^25s}|{:^6s}|{:^6s}|{:^9s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^6s}+{hf:-^6s}+{hf:-^9s}\n".format("Pos.","User","Losses","Wins","W/L Ratio",hf="")
+                    for i in range(len(rows)):
+                        outputString+="{:>4d}|".format(i+1)
+                        user=await client.fetch_user(rows[i][0])
+                        outputString+="{:^25s}|{:^6d}|{:^6d}|{:^9.2f}\n".format(user.display_name,rows[i][3],rows[i][2],rows[i][4])
+                    outputString+="```"
                     
-                    outputString+=await generateLeaderboardData(rows)
+                    #outputString+=await generateLeaderboardData(rows)
                     
                 elif splitMessage[1][0].lower()=='r':
                     rows=db.getOrderByWinLossRatio(message.guild.id)
 
                     outputString+="> **__Leaderbord by Win/Loss Ratio__**\n"
                     
-                    outputString+=await generateLeaderboardData(rows)
-                    
+                    outputString="```{:^4s}|{:^25s}|{:^9s}|{:^6s}|{:^6s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^9s}+{hf:-^6s}+{hf:-^6s}\n".format("Pos.","User","W/L Ratio","Wins","Losses",hf="")
+                    for i in range(len(rows)):
+                        outputString+="{:>4d}|".format(i+1)
+                        user=await client.fetch_user(rows[i][0])
+                        outputString+="{:^25s}|{:^9.2f}|{:^6d}|{:^6d}\n".format(user.display_name,rows[i][4],rows[i][2],rows[i][3])
+                    outputString+="```"
+
+                    #outputString+=await generateLeaderboardData(rows)
+
+                elif splitMessage[1][0].lower()=='m':
+                    rows=db.getOrderByMoyai(message.guild.id)
+
+                    outputString+="> **__Leaderbord :moyai:__**\n"
+
+                    outputString+="```{:^4s}|{:^25s}|{:^5s}\n{hf:-^4s}+{hf:-^25s}+{hf:-^5s}\n".format("Pos.","User","Moyai",hf="")
+                    for i in range(len(rows)):
+                        outputString+="{:>4d}|".format(i+1)
+                        user=await client.fetch_user(rows[i][0])
+                        outputString+="{:^25s}|{:^5d}\n".format(user.display_name,rows[i][5])
+                    outputString+="```"
+
                 else:
-                    outputString="**Input error:** Please specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```> W = Wins\n> L = Losses\n> R = Win/Loss Ratio"
+                    outputString="**Input error:** Please specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```Replace **<arg>** with any of the following:\n> **W** = Wins\n> **L** = Losses\n> **R** = Win/Loss Ratio\n> **M** = :moyai:"
             else:
-                outputString="**Input error:** Invalid amount of arguments passed.\nPlease make sure that your syntax is correct."
+                outputString="**Input error:** Invalid amount of arguments passed.\nPlease specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```Replace **<arg>** with any of the following:\n> **W** = Wins\n> **L** = Losses\n> **R** = Win/Loss Ratio\n> **M** = :moyai:"
 
         elif message.content.startswith(prefix+"register"):
             result=db.addNewUser(message.author.id,message.guild.id)
@@ -287,6 +324,12 @@ async def on_message(message):
                 outputString=f"<@{message.author.id}>, you have been successfully registered to this server's leaderboard database."
             else:
                 outputString=f"<@{message.author.id}>, you are already registered in this server's leaderboard database."
+        elif message.content.startswith(prefix+"unregister"):
+            result=db.removeUser(message.author.id,message.guild.id)
+            if result:
+                outputString=f"<@{message.author.id}>, you have been successfully removed this server's leaderboard database."
+            else:
+                outputString=f"<@{message.author.id}>, you are not in this server's leaderboard database.  If you would like to join the database, use the `!register` command."
         await message.channel.send(outputString)
 #End of on_message()
 
@@ -337,11 +380,6 @@ async def generateLeaderboardData(data):
         outputString+="{:>4d}|".format(i+1)
         user=await client.fetch_user(data[i][0])
         outputString+="{:^25s}|{:^6d}|{:^6d}|{:^9.2f}|{:^5d}\n".format(user.display_name,data[i][2],data[i][3],data[i][4],data[i][5])
-    #outputString="User\t|Wins\t|Losses\t|W/L Ratio\t|Moyai"
-    #for i in range(len(data)):
-    #    outputString+=f"{i+1}) "
-        
-    #    outputString+=f"**{user.display_name}**, {data[i][2]}, {data[i][3]}, {data[i][4]}, {data[i][5]}\n"
     outputString+="```"
     return outputString
 

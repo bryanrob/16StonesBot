@@ -1,8 +1,10 @@
+from asyncio.windows_events import NULL
 import mariadb
 import sys
 
 class DB:
     def __init__(this):
+        print("Connecting to the database...")
         file=open("db.creds","r")
         creds=[]
         while(True):
@@ -30,7 +32,8 @@ class DB:
             this.cursor.execute(f"use {this.databaseName}")
             this.cursor.execute(f"select * from {this.databaseName}.{this.tableName}")
             this.columns=[i[0]for i in this.cursor.description]
-            print(this.columns)
+            #print(this.columns)
+            print("Connection successful!")
         except mariadb.Error as e:
             print(f"Error connecting to the database: {e}")
             sys.exit(1)
@@ -73,47 +76,53 @@ class DB:
         return False
     
     def addWin(this,userid,guildid):
-        data=this.getRowById(userid,guildid)
+        rowFound,data=this.getRowById(userid,guildid)
 
-        #get Wins
-        wins=data[2]
-        
-        #get Losses
-        losses=data[3]
-        if losses==0:
-            losses=1
-        #print("Data from wins at ("+str(userid)+"): "+str(wins))
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[2]}={wins+1} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+        if rowFound:
+            #get Wins
+            wins=data[2]
+            
+            #get Losses
+            losses=data[3]
+            if losses==0:
+                losses=1
+            #print("Data from wins at ("+str(userid)+"): "+str(wins))
+            this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[2]}={wins+1} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
 
-        #update win/loss ratio
-        w_l_ratio=float(wins+1)/float(losses)
-        #print("New win/loss ratio is:"+str(w_l_ratio))
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
-        this.database.commit()
+            #update win/loss ratio
+            w_l_ratio=float(wins+1)/float(losses)
+            #print("New win/loss ratio is:"+str(w_l_ratio))
+            this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+            this.database.commit()
 
     def addLoss(this,userid,guildid):
-        data=this.getRowById(userid,guildid)
+        rowFound,data=this.getRowById(userid,guildid)
 
-        #get Wins
-        wins=data[2]
-        #get Losses
-        losses=data[3]+1
+        if rowFound:
+            #get Wins
+            wins=data[2]
+            #get Losses
+            losses=data[3]+1
 
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[3]}={losses} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
-        w_l_ratio=float(wins)/float(losses)
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
-        this.database.commit()
+            this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[3]}={losses} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+            w_l_ratio=float(wins)/float(losses)
+            this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+            this.database.commit()
 
     def addMoyai(this,userid,guildid,amount):
-        data=this.getRowById(userid,guildid)
+        rowFound,data=this.getRowById(userid,guildid)
 
-        this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[5]}={data[5]+amount} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
-        this.database.commit()
+        if rowFound:
+            this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[5]}={data[5]+amount} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+            this.database.commit()
 
     def getRowById(this,userid,guildid):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         data=this.cursor.fetchall()
-        return data[0]
+
+        if len(data)>0:
+            return True,data[0]
+        return False,NULL
 
     def getOrderBy(this,ind):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} order by {this.columns[ind]} desc")
@@ -141,6 +150,10 @@ class DB:
 
     def close(this):
         this.database.close()
+#END CLASS: DB
+
+#EVERYTHING BELOW THIS LINE IS ONLY USED TO TEST THE CODE ABOVE.
+#---------------------------------------------------------------
 
 class Row:
     def __init__(this,id,guild,wins,losses,wlratio,moyai):
