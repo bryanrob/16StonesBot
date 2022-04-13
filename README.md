@@ -23,7 +23,7 @@ Account_Password=
 Database_Name=
 Table_Name=
 ```
-  - If you ran the SQL file from step 4, your table name will be "*main*".
+  - If you ran the SQL file from step 4, your table name will be: *main*.
 This concludes the setup process.
 
 ## Bot Activation
@@ -43,9 +43,10 @@ The most useful ones are as follows:
   - If the user is in a running instance, the player will forfeit the game and close the instance.
 - **leaderboard \[sort by\]**
   - Displays the top 5 listings for users in the same server based on the **sort-by** parameter.  Parameters are as follows:
-    - **W**: sorts by wins.
+    - **W**: Sorts by wins.
     - **L**: Sorts by losses.
     - **R**: Sorts by win-loss ratio.
+    - **M**: Sorts by 🗿.
 
 ## Project Developers
 - [Jake (phantump)](https://github.com/phantump)

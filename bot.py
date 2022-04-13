@@ -158,16 +158,17 @@ async def on_message(message):
 
                             outputString=instance.outputString
                 if instance.game.getBoardSum()==1:
-                    #looser=instance.game.getTurn()%2
-                    #if looser==0:
-                    #    winrar=1
-                    #else:
-                    #    winrar=0
+                    looser=instance.game.getTurn()%2
+                    if looser==0:
+                        winrar=1
+                    else:
+                        winrar=0
                     #db.addWin(instance.players[winrar].id,message.guild.id)
                     #db.addLoss(instance.players[looser].id,message.guild.id)
 
-                    distributeWinLoss(instance,message.guild.id)
-                    
+                    #distributeWinLoss(instance,message.guild.id)
+                    outputString+="\n"+distributeWinLossAndOutput(instance.players[winrar].id,instance.players[looser].id,message.guild.id)
+
                     del instances[instance.players[0].id]
                     del instances[instance.players[1].id]
             else:
@@ -178,19 +179,25 @@ async def on_message(message):
 
             if found:
                 if instance.players[0].id==message.author.id:
-                    db.addLoss(instance.players[0].id,message.guild.id)
-                    db.addWin(instance.players[1].id,message.guild.id)
-                    outputString="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
+                    #db.addLoss(instance.players[0].id,message.guild.id)
+                    #db.addWin(instance.players[1].id,message.guild.id)
+                    outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!\n"
+                    outputString+=distributeWinLossAndOutput(instance.players[1].id,instance.players[0].id,message.guild.id)
                 elif instance.players[1].id==message.author.id:
-                    db.addLoss(instance.players[1].id,message.guild.id)
-                    db.addWin(instance.players[0].id,message.guild.id)
-                    outputString="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
+                    #db.addLoss(instance.players[1].id,message.guild.id)
+                    #db.addWin(instance.players[0].id,message.guild.id)
+                    outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!\n"
+                    outputString+=distributeWinLossAndOutput(instance.players[0].id,instance.players[1].id,message.guild.id)
             else:
                 outputString=instance
 
         elif message.content.startswith(prefix+'help'):
-            outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```To view the leaderboards, use:```!leaderboard <arg>```Keep in mind, however, that **your played games will __NOT__ be tracked on the leaderboard until you complete your leaderboard registration!**\nYou can do this by using the `!register` command.\nYou can also remove your leaderboard data at anytime using the `!unregister` command.\n\nGood luck, and have fun!"
-                    
+            outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```To view the leaderboards, use:```!leaderboard <arg>```Keep in mind, however, that **your played games will __NOT__ be tracked on the leaderboard until you complete your leaderboard registration!**\nYou can do this by using the `!register` command.\nYou can also remove your leaderboard data at anytime using the `!unregister` command, or `!unregister-from-all` to erase all of your registries from the database under this bot's control.\n\nGood luck, and have fun!"
+        elif message.content.startswith(prefix+'help-admin'):
+            if message.author.guild_permissions.administrator:
+                outputString="__**Administrator Commands**__\nAdministrators can use these commands in order to moderate the activities of SixteenStones within their server:\n```!clearInstance @<user>```Deletes the instance with the pinged <user>.  Wins/Losses are not affected by this command.```!clearInstances```Deletes all instances running on your server.  Wins/Losses are not affected by this command.```!unregister-user```Unregisters the pinged user from your server's leaderboard.  Their Wins and Losses will be erased from your server's database completely, so if the user registers again, their data will reset to the default starter values."
+            else:
+                outputString="**Error:** you do not have sufficient server permissions to access this command."
         elif message.content.startswith(prefix+'fu'):
             found,instance=removeInstance(message.author.id)
 
@@ -207,16 +214,20 @@ async def on_message(message):
                     outputString+=stones[i]
                 outputString+="ヾ(ﾟдﾟ)ﾉ゛**"
                 if instance.game.getTurn()<=2:
-                    outputString+="\n```\t\t\t\t\tBut we just started!```\n"
-
+                    outputString+="```\t\t\t\t\tBut we just started!```"
+                else:
+                    outputString+="\n"
+                outputString+="\n"
                 if instance.players[0].id==message.author.id:
-                    db.addLoss(instance.players[0].id,message.guild.id)
-                    db.addWin(instance.players[1].id,message.guild.id)
-                    outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!"
+                    #db.addLoss(instance.players[0].id,message.guild.id)
+                    #db.addWin(instance.players[1].id,message.guild.id)
+                    outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!\n"
+                    outputString+=distributeWinLossAndOutput(instance.players[1].id,instance.players[0].id,message.guild.id)
                 elif instance.players[1].id==message.author.id:
-                    db.addLoss(instance.players[1].id,message.guild.id)
-                    db.addWin(instance.players[0].id,message.guild.id)
-                    outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!"
+                    #db.addLoss(instance.players[1].id,message.guild.id)
+                    #db.addWin(instance.players[0].id,message.guild.id)
+                    outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!\n"
+                    outputString+=distributeWinLossAndOutput(instance.players[0].id,instance.players[1].id,message.guild.id)
             else:
                 outputString=instance
         elif message.content.startswith(prefix+"clearInstances"):
@@ -330,6 +341,25 @@ async def on_message(message):
                 outputString=f"<@{message.author.id}>, you have been successfully removed this server's leaderboard database."
             else:
                 outputString=f"<@{message.author.id}>, you are not in this server's leaderboard database.  If you would like to join the database, use the `!register` command."
+        elif message.content.startswith(prefix+"unregister-from-all"):
+            result=db.removeAllofUser(message.author.id)
+
+            if result:
+                outputString=f"<@{message.author.id}>, you have been unregistered from all server databases monitored by this bot."
+            else:
+                outputString=f"<@{message.author.id}>, your user data was not detected in our database."
+        elif message.content.startswith(prefix+"unregister-user"):
+            if message.author.guild_permissions.administrator:
+                user=await getUserInMessage(message.content)
+
+                result=db.removeUser(user.id,message.guild.id)
+
+                if result:
+                    outputString=f"Removed {user.display_name} from this server's database."
+                else:
+                    outputString=f"{user.display_name} is not in this server's database."
+            else:
+                outputString="**Error:** you do not have sufficient server permissions to use this command."
         await message.channel.send(outputString)
 #End of on_message()
 
@@ -392,6 +422,24 @@ def distributeWinLoss(instance,guildid):
     db.addWin(instance.players[winrar].id,guildid)
     db.addLoss(instance.players[looser].id,guildid)
 
+def distributeWinLossAndOutput(winrar,looser,guildid):
+    returnThis=""
+
+    winrarRowExists,wdata=db.getRowById(winrar.id,guildid)
+    looserRowExists,ldata=db.getRowById(looser.id,guildid)
+
+    if winrarRowExists:
+        db.addWin(winrar.id,guildid)
+        returnThis+=f"**{winrar.display_name}:** Wins: {wdata[2]} (+1), Losses: {wdata[3]} (+0), Ratio: {wdata[4]}\n"
+    else:
+        returnThis+=f"**{winrar.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n"
+    if looserRowExists:
+        db.addLoss(looser.id,guildid)
+        returnThis+=f"**{looser.display_name}:** Wins: {ldata[2]} (+0), Losses: {ldata[3]} (+1), Ratio: {ldata[4]}"
+    else:
+        returnThis+=f"**{looser.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results."
+
+    return returnThis
 
 
 client.run(TOKEN)
