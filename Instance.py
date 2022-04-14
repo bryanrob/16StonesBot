@@ -52,12 +52,16 @@ class Instance:
 					temp.append(random.choice(stones[0:len(stones)-1]))
 			this.graphicsBoard.append(temp)
 
+		#tmp,moyaiFound,moyaiCounter=this.configureBoardGraphics()
+		#returnThis+=tmp
 		returnThis+=this.configureBoardGraphics()
 
 		return returnThis.strip()
 
 	def configureBoardGraphics(this):
 		returnThis=""
+		#moyaiFound=False
+		#moyaiCounter=0
 
 		board=this.game.getBoard()
 
@@ -70,12 +74,26 @@ class Instance:
 				returnThis+=this.graphicsBoard[i][j]
 			returnThis+="\n"
 
-		return returnThis
+		return returnThis#,moyaiFound,moyaiCounter
 
 	#self.generateBoardGraphics(self):
 	#Creates the graphical output of the board.  Is called in other Instance functions to update the 'outputString' value.
 	def generateBoardGraphics(this):
 		returnThis=""
+		moyaiCounter=0
+		moyaiFound=False
+
+		for i in range(len(this.game.getBoard())):
+			row=this.graphicsBoard[i][this.game.getBoard()[i]+1:len(this.graphicsBoard[i])]
+			#print(row)
+			if ':moyai:' in row:
+				#print("Moyai found!")
+				moyaiFound=True
+				for stone in row:
+					if stone==':moyai:':
+						moyaiCounter+=1
+		if moyaiFound:
+			returnThis+=":moyai:\n"
 		
 		if this.game.getBoardSum()!=1:
 			returnThis+="> Turn: "+str(this.game.getTurn())+", Player "+str(this.game.getTurnPlayer())+" [<@"+str(this.players[this.game.getTurnPlayer()-1].id)+">], go.\n" 
@@ -90,9 +108,10 @@ class Instance:
 		#		returnThis+=random.choice(stones)+" "
 		#	returnThis+="\n"
 		
-		returnThis+=this.configureBoardGraphics()
+		tmp=this.configureBoardGraphics()
+		returnThis+=tmp
 
-		return returnThis.strip()
+		return returnThis.strip(),moyaiFound,moyaiCounter
 	#end function generateBoardGraphics(self)
 
 	#Public Function(s)
@@ -117,10 +136,14 @@ class Instance:
 															#offset from the index by 1, thus the correction is made here.
 			
 			if this.game.getBoardSum()==1:
-				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"+this.generateBoardGraphics()
+				output,moyaiFound,moyaiCounter=this.generateBoardGraphics()
+
+				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"+output
+				return moyaiFound,moyaiCounter
 			else:			
 				if result:
-					this.outputString=this.generateBoardGraphics()
+					this.outputString,moyaiFound,moyaiCounter=this.generateBoardGraphics()
+					return moyaiFound,moyaiCounter
 				else:
 					this.outputString=resultMessage
 	#end function move(self,Player,int,int)
