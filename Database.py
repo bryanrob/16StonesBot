@@ -47,7 +47,7 @@ class DB:
     def addNewUser(this,userid,guildid):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}='{userid}' and {this.columns[1]}='{guildid}'")
         data=this.cursor.fetchall()
-        print(f"Attempting to add user {userid} from {guildid} to database.\nDuplicate entries found:{len(data)}")
+        #print(f"Attempting to add user {userid} from {guildid} to database.\nDuplicate entries found:{len(data)}")
 
         if len(data)==0:
             this.cursor.execute(f"insert ignore into {this.databaseName}.{this.tableName} ({this.columns[0]},{this.columns[1]},{this.columns[2]},{this.columns[3]},{this.columns[4]},{this.columns[5]}) values ('{userid}','{guildid}','{0}','{0}','{0.0}','{0}')")
@@ -56,7 +56,7 @@ class DB:
         return False
     
     def removeUser(this,userid,guildid):
-        this.cursor.execute(f"select from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         data=this.cursor.fetchall()
 
         if len(data)!=0:
@@ -66,7 +66,7 @@ class DB:
         return False
 
     def removeAllofUser(this,userid):
-        this.cursor.execute(f"select from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid}")
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid}")
         data=this.cursor.fetchall()
 
         if len(data)!=0:

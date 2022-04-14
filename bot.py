@@ -358,13 +358,13 @@ async def on_message(message):
                 outputString=f"<@{message.author.id}>, you have been successfully registered to this server's leaderboard database."
             else:
                 outputString=f"<@{message.author.id}>, you are already registered in this server's leaderboard database."
-        elif message.content.startswith(prefix+"unregister"):
+        elif message.content==prefix+"unregister":
             result=db.removeUser(message.author.id,message.guild.id)
             if result:
                 outputString=f"<@{message.author.id}>, you have been successfully removed this server's leaderboard database."
             else:
                 outputString=f"<@{message.author.id}>, you are not in this server's leaderboard database.  If you would like to join the database, use the `!register` command."
-        elif message.content.startswith(prefix+"unregister-from-all"):
+        elif message.content==prefix+"unregister-from-all":
             result=db.removeAllofUser(message.author.id)
 
             if result:
@@ -373,14 +373,17 @@ async def on_message(message):
                 outputString=f"<@{message.author.id}>, your user data was not detected in our database."
         elif message.content.startswith(prefix+"unregister-user"):
             if message.author.guild_permissions.administrator:
-                user=await getUserInMessage(message.content)
+                userFound,user=await getUserInMessage(message.content)
 
-                result=db.removeUser(user.id,message.guild.id)
+                if userFound:
+                    result=db.removeUser(user.id,message.guild.id)
 
-                if result:
-                    outputString=f"Removed {user.display_name} from this server's database."
+                    if result:
+                        outputString=f"Removed {user.display_name} from this server's database."
+                    else:
+                        outputString=f"{user.display_name} is not in this server's database."
                 else:
-                    outputString=f"{user.display_name} is not in this server's database."
+                    outputString="**Error:** user not found."
             else:
                 outputString="**Error:** you do not have sufficient server permissions to use this command."
         await message.channel.send(outputString)
