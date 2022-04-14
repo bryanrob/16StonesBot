@@ -166,8 +166,14 @@ async def on_message(message):
                     #db.addWin(instance.players[winrar].id,message.guild.id)
                     #db.addLoss(instance.players[looser].id,message.guild.id)
 
+                   
+
                     #distributeWinLoss(instance,message.guild.id)
-                    outputString+="\n"+distributeWinLossAndOutput(instance.players[winrar].id,instance.players[looser].id,message.guild.id)
+
+                    w_user=await client.fetch_user(instance.players[winrar].id)
+                    l_user=await client.fetch_user(instance.players[looser].id)
+
+                    outputString+="\n"+distributeWinLossAndOutput(w_user,l_user,message.guild.id)
 
                     del instances[instance.players[0].id]
                     del instances[instance.players[1].id]
@@ -175,6 +181,7 @@ async def on_message(message):
                 outputString="**Error:** You are not in any existing instance, <@"+str(message.author.id)+">.\nYou can create one using the **!play** command."
 
         elif message.content.startswith(prefix+'quit'):
+            outputString=""
             found,instance=removeInstance(message.author.id)
 
             if found:
@@ -182,12 +189,22 @@ async def on_message(message):
                     #db.addLoss(instance.players[0].id,message.guild.id)
                     #db.addWin(instance.players[1].id,message.guild.id)
                     outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!\n"
-                    outputString+=distributeWinLossAndOutput(instance.players[1].id,instance.players[0].id,message.guild.id)
+                    
+                    w_user=await client.fetch_user(instance.players[1].id)
+                    l_user=await client.fetch_user(instance.players[0].id)
+
+                    outputString+=distributeWinLossAndOutput(w_user,l_user,message.guild.id)
+
                 elif instance.players[1].id==message.author.id:
                     #db.addLoss(instance.players[1].id,message.guild.id)
                     #db.addWin(instance.players[0].id,message.guild.id)
                     outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!\n"
-                    outputString+=distributeWinLossAndOutput(instance.players[0].id,instance.players[1].id,message.guild.id)
+                    
+                    w_user=await client.fetch_user(instance.players[0].id)
+                    l_user=await client.fetch_user(instance.players[1].id)
+
+                    outputString+="\n"+distributeWinLossAndOutput(w_user,l_user,message.guild.id)
+
             else:
                 outputString=instance
 
@@ -222,12 +239,18 @@ async def on_message(message):
                     #db.addLoss(instance.players[0].id,message.guild.id)
                     #db.addWin(instance.players[1].id,message.guild.id)
                     outputString+="Player 1 [<@"+str(instance.players[0].id)+">] admits defeat.\nPlayer 2 [<@"+str(instance.players[1].id)+">] wins!\n"
-                    outputString+=distributeWinLossAndOutput(instance.players[1].id,instance.players[0].id,message.guild.id)
+                    w_user=await client.fetch_user(instance.players[1].id)
+                    l_user=await client.fetch_user(instance.players[0].id)
+
+                    outputString+=distributeWinLossAndOutput(w_user,l_user,message.guild.id)
                 elif instance.players[1].id==message.author.id:
                     #db.addLoss(instance.players[1].id,message.guild.id)
                     #db.addWin(instance.players[0].id,message.guild.id)
                     outputString+="Player 2 [<@"+str(instance.players[1].id)+">] admits defeat.\nPlayer 1 [<@"+str(instance.players[0].id)+">] wins!\n"
-                    outputString+=distributeWinLossAndOutput(instance.players[0].id,instance.players[1].id,message.guild.id)
+                    w_user=await client.fetch_user(instance.players[0].id)
+                    l_user=await client.fetch_user(instance.players[1].id)
+
+                    outputString+=distributeWinLossAndOutput(w_user,l_user,message.guild.id)
             else:
                 outputString=instance
         elif message.content.startswith(prefix+"clearInstances"):
@@ -430,15 +453,18 @@ def distributeWinLossAndOutput(winrar,looser,guildid):
 
     if winrarRowExists:
         db.addWin(winrar.id,guildid)
-        returnThis+=f"**{winrar.display_name}:** Wins: {wdata[2]} (+1), Losses: {wdata[3]} (+0), Ratio: {wdata[4]}\n"
+        #returnThis+=f"**{winrar.display_name}:** Wins: {wdata[2]} (+1), Losses: {wdata[3]} (+0), Ratio: {wdata[4]}\n"
+        returnThis+="**{:s}:** Wins: {:d} (+1), Losses: {:d} (+0), Ratio: {:.2f}.\n".format(winrar.display_name,wdata[2],wdata[3],wdata[4])
     else:
-        returnThis+=f"**{winrar.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n"
+        #returnThis+=f"**{winrar.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n"
+        returnThis+="**{:s}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n".format(winrar.display_name)
     if looserRowExists:
         db.addLoss(looser.id,guildid)
-        returnThis+=f"**{looser.display_name}:** Wins: {ldata[2]} (+0), Losses: {ldata[3]} (+1), Ratio: {ldata[4]}"
+        #returnThis+=f"**{looser.display_name}:** Wins: {ldata[2]} (+0), Losses: {ldata[3]} (+1), Ratio: {ldata[4]}"
+        returnThis+="**{:s}:** Wins: {:d} (+0), Losses: {:d} (+1), Ratio: {:.2f}.\n".format(looser.display_name,ldata[2],ldata[3],ldata[4])
     else:
-        returnThis+=f"**{looser.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results."
-
+        #returnThis+=f"**{looser.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results."
+        returnThis+="**{:s}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n".format(looser.display_name)
     return returnThis
 
 

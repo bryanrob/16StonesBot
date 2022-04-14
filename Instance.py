@@ -84,7 +84,7 @@ class Instance:
 		moyaiFound=False
 
 		for i in range(len(this.game.getBoard())):
-			row=this.graphicsBoard[i]
+			row=this.graphicsBoard[i][this.game.getBoard()[i]+1:len(this.graphicsBoard[i])]
 			#print(row)
 			if ':moyai:' in row:
 				#print("Moyai found!")
@@ -136,7 +136,10 @@ class Instance:
 															#offset from the index by 1, thus the correction is made here.
 			
 			if this.game.getBoardSum()==1:
-				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"+this.generateBoardGraphics()
+				output,moyaiFound,moyaiCounter=this.generateBoardGraphics()
+
+				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"+output
+				return moyaiFound,moyaiCounter
 			else:			
 				if result:
 					this.outputString,moyaiFound,moyaiCounter=this.generateBoardGraphics()
