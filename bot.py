@@ -457,12 +457,14 @@ def distributeWinLossAndOutput(winrar,looser,guildid):
     if winrarRowExists:
         db.addWin(winrar.id,guildid)
         #returnThis+=f"**{winrar.display_name}:** Wins: {wdata[2]} (+1), Losses: {wdata[3]} (+0), Ratio: {wdata[4]}\n"
+        winrarRowExists,wdata=db.getRowById(winrar.id,guildid)
         returnThis+="**{:s}:** Wins: {:d} (+1), Losses: {:d} (+0), Ratio: {:.2f}.\n".format(winrar.display_name,wdata[2],wdata[3],wdata[4])
     else:
         #returnThis+=f"**{winrar.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n"
         returnThis+="**{:s}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n".format(winrar.display_name)
     if looserRowExists:
         db.addLoss(looser.id,guildid)
+        looserRowExists,ldata=db.getRowById(looser.id,guildid)
         #returnThis+=f"**{looser.display_name}:** Wins: {ldata[2]} (+0), Losses: {ldata[3]} (+1), Ratio: {ldata[4]}"
         returnThis+="**{:s}:** Wins: {:d} (+0), Losses: {:d} (+1), Ratio: {:.2f}.\n".format(looser.display_name,ldata[2],ldata[3],ldata[4])
     else:

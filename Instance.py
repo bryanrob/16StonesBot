@@ -146,6 +146,7 @@ class Instance:
 					return moyaiFound,moyaiCounter
 				else:
 					this.outputString=resultMessage
+		return False,0
 	#end function move(self,Player,int,int)
 
 	def hasPlayer(this,playerID):
