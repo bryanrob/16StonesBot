@@ -180,7 +180,7 @@ async def on_message(message):
             else:
                 outputString="**Error:** You are not in any existing instance, <@"+str(message.author.id)+">.\nYou can create one using the **!play** command."
 
-        elif message.content.startswith(prefix+'quit'):
+        elif message.content==prefix+'quit':
             outputString=""
             found,instance=removeInstance(message.author.id)
 
@@ -208,14 +208,14 @@ async def on_message(message):
             else:
                 outputString=instance
 
-        elif message.content.startswith(prefix+'help'):
+        elif message.content==prefix+'help':
             outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```To view the leaderboards, use:```!leaderboard <arg>```Keep in mind, however, that **your played games will __NOT__ be tracked on the leaderboard until you complete your leaderboard registration!**\nYou can do this by using the `!register` command.\nYou can also remove your leaderboard data at anytime using the `!unregister` command, or `!unregister-from-all` to erase all of your registries from the database under this bot's control.\n\nGood luck, and have fun!"
-        elif message.content.startswith(prefix+'help-admin'):
+        elif message.content==prefix+'help-admin':
             if message.author.guild_permissions.administrator:
-                outputString="__**Administrator Commands**__\nAdministrators can use these commands in order to moderate the activities of SixteenStones within their server:\n```!clearInstance @<user>```Deletes the instance with the pinged <user>.  Wins/Losses are not affected by this command.```!clearInstances```Deletes all instances running on your server.  Wins/Losses are not affected by this command.```!unregister-user```Unregisters the pinged user from your server's leaderboard.  Their Wins and Losses will be erased from your server's database completely, so if the user registers again, their data will reset to the default starter values."
+                outputString="__**Administrator Commands**__\nAdministrators can use these commands in order to moderate the activities of SixteenStones within their server:\n```!clearInstance @<user>```Deletes the instance with the pinged <user>.  Wins/Losses are not affected by this command.```!clearInstances```Deletes all instances running on your server.  Wins/Losses are not affected by this command.```!unregister-user```Unregisters the pinged user from your server's leaderboard.  Their Wins and Losses will be erased from your server's database completely, so if the user registers again, their data will reset to the default starter values.\nIf you need to erase all leaderboard records from your server, you can use ```!unregister-server```"
             else:
                 outputString="**Error:** you do not have sufficient server permissions to access this command."
-        elif message.content.startswith(prefix+'fu'):
+        elif message.content==prefix+'fu':
             found,instance=removeInstance(message.author.id)
 
             if found:
@@ -253,7 +253,7 @@ async def on_message(message):
                     outputString+=distributeWinLossAndOutput(w_user,l_user,message.guild.id)
             else:
                 outputString=instance
-        elif message.content.startswith(prefix+"clearInstances"):
+        elif message.content==prefix+"clearInstances":
             if message.author.guild_permissions.administrator:
                 messageGuild=message.guild.id
                 outputString="**yeet**\n```All guild instances removed.```"
@@ -386,6 +386,16 @@ async def on_message(message):
                     outputString="**Error:** user not found."
             else:
                 outputString="**Error:** you do not have sufficient server permissions to use this command."
+        elif message.content==prefix+"unregister-server":
+            if message.author.guild_permissions.administrator:
+                result=db.removeAllInServer(message.guild.id)
+
+                if result:
+                    outputString="All leaderboard records in this server have been successfully erased!"
+                else:
+                    outputString="**Error:** No leaderboard records for this server were found."
+            else:
+                outputString="**Error:** you do not have sufficient server permissions to use this command."
         await message.channel.send(outputString)
 #End of on_message()
 
@@ -457,12 +467,14 @@ def distributeWinLossAndOutput(winrar,looser,guildid):
     if winrarRowExists:
         db.addWin(winrar.id,guildid)
         #returnThis+=f"**{winrar.display_name}:** Wins: {wdata[2]} (+1), Losses: {wdata[3]} (+0), Ratio: {wdata[4]}\n"
+        winrarRowExists,wdata=db.getRowById(winrar.id,guildid)
         returnThis+="**{:s}:** Wins: {:d} (+1), Losses: {:d} (+0), Ratio: {:.2f}.\n".format(winrar.display_name,wdata[2],wdata[3],wdata[4])
     else:
         #returnThis+=f"**{winrar.display_name}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n"
         returnThis+="**{:s}:** __Results not saved__.  You must `!register` to this server's leaderboard in order to save future results.\n".format(winrar.display_name)
     if looserRowExists:
         db.addLoss(looser.id,guildid)
+        looserRowExists,ldata=db.getRowById(looser.id,guildid)
         #returnThis+=f"**{looser.display_name}:** Wins: {ldata[2]} (+0), Losses: {ldata[3]} (+1), Ratio: {ldata[4]}"
         returnThis+="**{:s}:** Wins: {:d} (+0), Losses: {:d} (+1), Ratio: {:.2f}.\n".format(looser.display_name,ldata[2],ldata[3],ldata[4])
     else:

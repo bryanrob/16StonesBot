@@ -74,6 +74,16 @@ class DB:
             this.database.commit()
             return True
         return False
+
+    def removeAllInServer(this,guildid):
+        this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[1]}={guildid}")
+        data=this.cursor.fetchall()
+
+        if len(data)!=0:
+            this.cursor.execute(f"delete from {this.databaseName}.{this.tableName} where {this.columns[1]}={guildid}")
+            this.database.commit()
+            return True
+        return False
     
     def addWin(this,userid,guildid):
         rowFound,data=this.getRowById(userid,guildid)

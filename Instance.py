@@ -138,7 +138,14 @@ class Instance:
 			if this.game.getBoardSum()==1:
 				output,moyaiFound,moyaiCounter=this.generateBoardGraphics()
 
-				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"+output
+				this.outputString="> **Game over!**\n> [<@"+str(this.players[turnPlayer].id)+">] wins!\n"
+
+				for row in this.graphicsBoard:
+					if ":moyai:" in row:
+						this.outputString+="https://cdn.discordapp.com/attachments/331316693941092362/957274958940221461/sadmoyai.mp4\n"
+
+				this.outputString+=output
+
 				return moyaiFound,moyaiCounter
 			else:			
 				if result:
@@ -146,6 +153,7 @@ class Instance:
 					return moyaiFound,moyaiCounter
 				else:
 					this.outputString=resultMessage
+		return False,0
 	#end function move(self,Player,int,int)
 
 	def hasPlayer(this,playerID):
