@@ -34,7 +34,7 @@ To activate the bot, simply run the **bot.py** file.  If the setup instructions 
 ## User Instructions
 There are numerous commands available in the bot already with many more on the way!
 
-Each command begins with an \[**!**\] prefix.
+Each command begins with an \[**!**\] prefix by default.
 
 The most useful ones are as follows:
 - **play @\[other_user\]**

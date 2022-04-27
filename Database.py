@@ -53,7 +53,13 @@ class DB:
             this.database.commit()
             return True
         return False
-    
+
+    #DB.removeUser(self : DB, userid : int, guildid : int) : boolean
+    #
+    #Attempts to remove a user from the database.  If the user entry does not exist, then
+    #the function will do nothing to the database and return false.  Otherwise, if it did
+    #find a matching entry: the function will delete the specific row from the database
+    #and return true.
     def removeUser(this,userid,guildid):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
         data=this.cursor.fetchall()
@@ -63,7 +69,10 @@ class DB:
             this.database.commit()
             return True
         return False
-
+    #DB.removeAllOfUser(self : DB, userid : int) : boolean
+    #
+    #Attempts to remove all instances of a given {userid} from the database.  If matches
+    #were found, then the function returns true.  Otherwise, it will return false.
     def removeAllofUser(this,userid):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[0]}={userid}")
         data=this.cursor.fetchall()
@@ -74,6 +83,11 @@ class DB:
             return True
         return False
 
+    #DB.removeAllInServer(self : DB, guildid : int) : boolean
+    #
+    #Attempts to remove all rows with the given {guildid}.  If any rows were found, they
+    #will be deleted and make the program return true.  Otherwise, if rows were not found,
+    #the function will instead return false.
     def removeAllInServer(this,guildid):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} where {this.columns[1]}={guildid}")
         data=this.cursor.fetchall()
@@ -83,7 +97,10 @@ class DB:
             this.database.commit()
             return True
         return False
-    
+    #DB.addWin(self : DB, userid : int, guildid : int) : void
+    #
+    #Attempts to increment the wins column in the row where the given {userid} and
+    #{guildid} exist. 
     def addWin(this,userid,guildid):
         rowFound,data=this.getRowById(userid,guildid)
 
@@ -103,7 +120,10 @@ class DB:
             #print("New win/loss ratio is:"+str(w_l_ratio))
             this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
             this.database.commit()
-
+    #DB.addLoss(self : DB, userid : int, guildid : int) : void
+    #
+    #Attempts to increment the losses column in the row where the given {userid} and
+    #{guildid} exist.
     def addLoss(this,userid,guildid):
         rowFound,data=this.getRowById(userid,guildid)
 
@@ -117,7 +137,10 @@ class DB:
             w_l_ratio=float(wins)/float(losses)
             this.cursor.execute(f"update {this.databaseName}.{this.tableName} set {this.columns[4]}={w_l_ratio} where {this.columns[0]}={userid} and {this.columns[1]}={guildid}")
             this.database.commit()
-
+    #DB.addMoyai(self : DB, userid : int, guildid : int,amount : int) : void
+    #
+    #Attempts to add the specified {amount} to what exists in the moyai column in the row
+    #where the given {userid} and {guildid} exist.
     def addMoyai(this,userid,guildid,amount):
         rowFound,data=this.getRowById(userid,guildid)
 
