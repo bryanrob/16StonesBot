@@ -1,5 +1,4 @@
 # bot.py
-from asyncio.windows_events import NULL
 import atexit
 import os
 from posixpath import split
@@ -16,7 +15,7 @@ prefix="!"
 load_dotenv()
 
 file=open("token.tkn","r")
-TOKEN=NULL
+TOKEN=None
 tokens=[]
 while(True):
     line=file.readline()

@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 import mariadb
 import sys
 
@@ -132,7 +131,7 @@ class DB:
 
         if len(data)>0:
             return True,data[0]
-        return False,NULL
+        return False,None
 
     def getOrderBy(this,ind):
         this.cursor.execute(f"select * from {this.databaseName}.{this.tableName} order by {this.columns[ind]} desc")
