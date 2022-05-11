@@ -1,5 +1,4 @@
 # bot.py
-from asyncio.windows_events import NULL
 import atexit
 import os
 from posixpath import split
@@ -16,7 +15,7 @@ prefix="!"
 load_dotenv()
 
 file=open("token.tkn","r")
-TOKEN=NULL
+TOKEN=None
 tokens=[]
 while(True):
     line=file.readline()
@@ -129,7 +128,7 @@ async def on_message(message):
                     outputString=targetUser
             else:
                 outputString="**Input error:** Ping the user who you want to play against.\nExample:/n> !play @exampleUser"
-
+        #end: if(prefix+"play")
         elif message.content.startswith(prefix+'take'):
             user=Player(message.author.id,message.author.name)
             if message.author.id in instances:
@@ -179,7 +178,7 @@ async def on_message(message):
                     del instances[instance.players[1].id]
             else:
                 outputString="**Error:** You are not in any existing instance, <@"+str(message.author.id)+">.\nYou can create one using the **!play** command."
-
+        #end: if(prefix+"take <arg>")
         elif message.content==prefix+'quit':
             outputString=""
             found,instance=removeInstance(message.author.id)
@@ -207,14 +206,16 @@ async def on_message(message):
 
             else:
                 outputString=instance
-
+        #end: if(prefix+"quit")
         elif message.content==prefix+'help':
             outputString="__**The Rules of Sixteen Stones**__\nThe game starts with a new board that contains sixteen stones.  Each player takes turns taking stones from the board.  This will continue until there is only 1 stone left on the board; at which point, **the player that takes the last stone __loses__**.  In other words, it does not matter how many stones you have- make sure you do **__not__** take the last stone!\nThe rules for taking stones from the board are as follows:\n> The turn player must take at least one stone to complete their turn.\n> A player can take as many stones from a single row as they want during their turn.\n> Players cannot add stones to the board.\n\n__**In-Chat Commands**__\nTo play the game against someone, simply enter:\n```!play @<user>```\t**<user>** will be the player you play against.\nIf you are playing, you can take stones using:\n```!take <row> <stones>```\tTakes the amount of **<stones>** from your selected **<row>**.\nIf you want to quit an instance, enter:\n```!quit```To view the leaderboards, use:```!leaderboard <arg>```Keep in mind, however, that **your played games will __NOT__ be tracked on the leaderboard until you complete your leaderboard registration!**\nYou can do this by using the `!register` command.\nYou can also remove your leaderboard data at anytime using the `!unregister` command, or `!unregister-from-all` to erase all of your registries from the database under this bot's control.\n\nGood luck, and have fun!"
+        #end: if(prefix+"help")
         elif message.content==prefix+'help-admin':
             if message.author.guild_permissions.administrator:
                 outputString="__**Administrator Commands**__\nAdministrators can use these commands in order to moderate the activities of SixteenStones within their server:\n```!clearInstance @<user>```Deletes the instance with the pinged <user>.  Wins/Losses are not affected by this command.```!clearInstances```Deletes all instances running on your server.  Wins/Losses are not affected by this command.```!unregister-user```Unregisters the pinged user from your server's leaderboard.  Their Wins and Losses will be erased from your server's database completely, so if the user registers again, their data will reset to the default starter values.\nIf you need to erase all leaderboard records from your server, you can use ```!unregister-server```"
             else:
                 outputString="**Error:** you do not have sufficient server permissions to access this command."
+        #end: if(prefix+"help-admin")
         elif message.content==prefix+'fu':
             found,instance=removeInstance(message.author.id)
 
@@ -253,6 +254,7 @@ async def on_message(message):
                     outputString+=distributeWinLossAndOutput(w_user,l_user,message.guild.id)
             else:
                 outputString=instance
+            #end: if(prefix+"fu")
         elif message.content==prefix+"clearInstances":
             if message.author.guild_permissions.administrator:
                 messageGuild=message.guild.id
@@ -272,6 +274,7 @@ async def on_message(message):
                         del instances[i]
             else:
                 outputString="**Error:** You are not a server administrator."
+        #end: if(prefix+"clearInstances")
         elif message.content.startswith(prefix+"clearInstance"):
             if message.author.guild_permissions.administrator:
                 splitMessage=message.content.strip().split(" ")
@@ -290,7 +293,7 @@ async def on_message(message):
                     outputString="**Input error:** Ping the user in the instance you want to delete.\nExample:\n```!clearInstance @<user>```"
             else:
                 outputString="**Error:** You are not a server administrator."
-
+        #end: if(prefix+"clearInstance <arg>")
         elif message.content.startswith(prefix+"leaderboard"):
             outputString=""
             splitMessage=message.content.strip().split(" ")
@@ -351,19 +354,21 @@ async def on_message(message):
                     outputString="**Input error:** Please specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```Replace **<arg>** with any of the following:\n> **W** = Wins\n> **L** = Losses\n> **R** = Win/Loss Ratio\n> **M** = :moyai:"
             else:
                 outputString="**Input error:** Invalid amount of arguments passed.\nPlease specify which leaderbord you want to view:\n```"+prefix+"leaderbord <arg>```Replace **<arg>** with any of the following:\n> **W** = Wins\n> **L** = Losses\n> **R** = Win/Loss Ratio\n> **M** = :moyai:"
-
+        #end: if(prefix+"leaderboard <arg>")
         elif message.content.startswith(prefix+"register"):
             result=db.addNewUser(message.author.id,message.guild.id)
             if result:
                 outputString=f"<@{message.author.id}>, you have been successfully registered to this server's leaderboard database."
             else:
                 outputString=f"<@{message.author.id}>, you are already registered in this server's leaderboard database."
+        #end: if(prefix+"register")
         elif message.content==prefix+"unregister":
             result=db.removeUser(message.author.id,message.guild.id)
             if result:
                 outputString=f"<@{message.author.id}>, you have been successfully removed this server's leaderboard database."
             else:
                 outputString=f"<@{message.author.id}>, you are not in this server's leaderboard database.  If you would like to join the database, use the `!register` command."
+        #end: if (prefix+"unregister")
         elif message.content==prefix+"unregister-from-all":
             result=db.removeAllofUser(message.author.id)
 
@@ -371,6 +376,7 @@ async def on_message(message):
                 outputString=f"<@{message.author.id}>, you have been unregistered from all server databases monitored by this bot."
             else:
                 outputString=f"<@{message.author.id}>, your user data was not detected in our database."
+        #end: if(prefix+"unregister-from-all")
         elif message.content.startswith(prefix+"unregister-user"):
             if message.author.guild_permissions.administrator:
                 userFound,user=await getUserInMessage(message.content)
@@ -386,6 +392,7 @@ async def on_message(message):
                     outputString="**Error:** user not found."
             else:
                 outputString="**Error:** you do not have sufficient server permissions to use this command."
+        #end: if(prefix+"unregister-user <arg>")
         elif message.content==prefix+"unregister-server":
             if message.author.guild_permissions.administrator:
                 result=db.removeAllInServer(message.guild.id)
@@ -396,6 +403,7 @@ async def on_message(message):
                     outputString="**Error:** No leaderboard records for this server were found."
             else:
                 outputString="**Error:** you do not have sufficient server permissions to use this command."
+        #end: if(prefix+"unregister-server")
         await message.channel.send(outputString)
 #End of on_message()
 

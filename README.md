@@ -10,7 +10,9 @@ This bot will require Python 3 in order to run.  You will also need access to a 
   ```
   discord.py
   python-dotenv
+  mariadb
   ```
+  - For the *mariadb* connector, follow the installation instructions for your operating system from the MariaDB Python documentation.
 3) Create a new ```token.tkn``` file; paste and save your Discord bot token into it.
 4) Create your MariaDB server.
   - Create a database and run the provided .sql files in the ```/migrations/``` folder in the order that they appear.
@@ -32,7 +34,7 @@ To activate the bot, simply run the **bot.py** file.  If the setup instructions 
 ## User Instructions
 There are numerous commands available in the bot already with many more on the way!
 
-Each command begins with an \[**!**\] prefix.
+Each command begins with an \[**!**\] prefix by default.
 
 The most useful ones are as follows:
 - **play @\[other_user\]**
