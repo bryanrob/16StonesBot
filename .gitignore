@@ -2,4 +2,5 @@ __pycache__
 token.tkn
 db.creds
 logs
-ErrorLogger.py
+terst.py
+terst.txt

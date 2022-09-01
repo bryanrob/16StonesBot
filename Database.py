@@ -34,7 +34,7 @@ class DB:
             #print(this.columns)
             print("Connection successful!")
         except mariadb.Error as e:
-            print(f"Error connecting to the database: {e}")
+            print(f"\nDATABASE CONNECTION ERROR:\n{e}")
             sys.exit(1)
 
     

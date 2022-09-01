@@ -1,6 +1,7 @@
 # bot.py
 import atexit
 import os
+import sys
 from posixpath import split
 import random
 from unittest import result
@@ -16,42 +17,37 @@ load_dotenv()
 
 file=open("token.tkn","r")
 TOKEN=None
-tokens=[]
-while(True):
-    line=file.readline()
-    if not line:
-        break
-    line=line.strip()
-    tokens.append(line)
+tokens=file.readlines()
+file.close()
 
 if len(tokens)==0:
-    print("Error: token.tkn file is empty.\nPlease save your Discord bot tokens into the file.")
-elif len(tokens)==1:
-    TOKEN=tokens[0]
+    sys.exit("\nSTARTUP ERROR: \"token.tkn\" file is empty.\nPlease save your Discord bot tokens into the file.")
 else:
-    print("Multiple tokens found.  Please select which one you are using:")
     for i in range(len(tokens)):
-        print(str(i+1)+") "+tokens[i])
-    invalidSelection=True
-    while invalidSelection:
-        response=input()
-        if response.lower()=="exit":
-            print("Program terminated.")
-            exit(0)
-        try:
-            selection=int(response)
-            if selection>0 and selection<=len(tokens):
-                TOKEN=tokens[selection-1]
-                invalidSelection=False
-            else:
-                print("Invalid selection.  Please enter only the number corresponding with the listed token above.")
-        except:
-            print("Input error: enter only an integer value.")
+        tokens[i]=tokens[i].strip()
+    if len(tokens)==1:
+        TOKEN=tokens[0]
+    else:
+        print("Multiple tokens found.  Please select which one you are using:")
+        for i in range(len(tokens)):
+            print(str(i+1)+") "+tokens[i])
+        invalidSelection=True
+        while invalidSelection:
+            response=input()
+            if response.lower()=="exit":
+                print("Program terminated.")
+                sys.exit(0)
+            try:
+                selection=int(response)
+                if selection>0 and selection<=len(tokens):
+                    TOKEN=tokens[selection-1]
+                    invalidSelection=False
+                else:
+                    print("Invalid selection.  Please enter only the number corresponding with the listed token above.")
+            except:
+                print("Input error: enter only an integer value.")
 
-#TOKEN=file.readline()
-print("Token from \{token.tkn\}: "+TOKEN)
-file.close()
-#TOKEN = os.getenv(token)
+print("Connecting with TOKEN: "+TOKEN)
 
 client = discord.Client()
 db=DB()
@@ -64,30 +60,6 @@ print("Logging into Discord...")
 @client.event
 async def on_ready():
     print(f'{client.user.name} has connected to Discord!')
-
-#@client.event
-#async def on_member_join(member):
-#    await member.create_dm()
-#    await member.dm_channel.send(
-#        f'Hi {member.name}, welcome to my Discord server!'
-#    )
-
-#@client.event
-#async def on_message(message):
-#    if message.author == client.user:
-#        return
-#
-#    brooklyn_99_quotes = [
-#        ('I\'m the human form of the 💯 emoji.'),
-#        ('Bingpot!'),
-#        ( 'Cool. Cool cool cool cool cool cool cool, '
-#            'no doubt no doubt no doubt no doubt.'
-#        ),
-#    ]
-#
-#    if message.content == '99!':
-#        response = random.choice(brooklyn_99_quotes)
-#        await message.channel.send(response)
 
 @client.event
 async def on_message(message):
